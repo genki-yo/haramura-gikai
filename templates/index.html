@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="search-card">
+  <form method="get" action="/">
+    <div class="field-group">
+      <label for="q">キーワード</label>
+      <input type="text" id="q" name="q" value="{{ query }}" placeholder="例: 防災, 保育, デマンドバス" />
+      <p class="hint">議題・発言者・本文のどこかに含まれていればヒットします。</p>
+    </div>
+    <div class="grid">
+      <div class="field-group">
+        <label for="committee">開催種別</label>
+        <select id="committee" name="committee">
+          <option value="">すべて</option>
+          {% for c in committees %}
+          <option value="{{ c }}" {% if committee == c %}selected{% endif %}>{{ c }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="field-group">
+        <label for="category">テーマ</label>
+        <select id="category" name="category">
+          <option value="">すべて</option>
+          {% for c in categories %}
+          <option value="{{ c }}" {% if category == c %}selected{% endif %}>{{ c }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="field-group">
+        <label for="speaker">発言者</label>
+        <select id="speaker" name="speaker">
+          <option value="">だれでも</option>
+          {% for s in speakers %}
+          <option value="{{ s }}" {% if speaker == s %}selected{% endif %}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="field-group">
+        <label for="year">年度</label>
+        <select id="year" name="year">
+          <option value="">すべて</option>
+          {% for y in years %}
+          <option value="{{ y }}" {% if year == y %}selected{% endif %}>{{ y }}年度</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="actions">
+      <button type="submit" class="primary">検索する</button>
+      <a href="/" class="ghost">リセット</a>
+    </div>
+  </form>
+</section>
+
+<section class="results">
+  <div class="results-meta">
+    <h2>検索結果</h2>
+    <p>{{ results|length }} 件ヒット</p>
+  </div>
+  {% if results %}
+  <ul class="result-list">
+    {% for item in results %}
+    <li class="result-item">
+      <div class="result-header">
+        <p class="badge">{{ item.committee }}</p>
+        <p class="date">{{ item.date }}</p>
+      </div>
+      <h3>{{ item.title }}</h3>
+      <p class="meta">テーマ: {{ item.category }} | 発言者: {{ item.speakers|join(', ') }} | 会場: {{ item.location }}</p>
+      <p class="summary">{{ item.summary }}</p>
+      <p class="snippet" aria-label="本文抜粋">{{ item.snippet|safe }}...</p>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <div class="empty">条件に合致する議事録がまだ登録されていません。キーワードを変えてみてください。</div>
+  {% endif %}
+</section>
+{% endblock %}
