@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ title or '議会検索シンプル版' }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/modern-normalize/2.0.0/modern-normalize.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="container">
+        <div>
+          <p class="eyebrow">羽村市議会 | デモ</p>
+          <h1><a href="/">議会検索シンプル版</a></h1>
+          <p class="lead">知りたいテーマやキーワードから、関連する議事録をすばやく横断検索できます。</p>
+        </div>
+        <div class="pill">サンプルデータ</div>
+      </div>
+    </header>
+    <main class="container">
+      {% block content %}{% endblock %}
+    </main>
+    <footer class="footer">
+      <div class="container">
+        <p>このデモは議事録横断検索のシンプル版です。キーワードや絞り込み条件を組み合わせてご利用ください。</p>
+      </div>
+    </footer>
+  </body>
+</html>
