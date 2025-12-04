@@ -130,6 +130,10 @@
         return [...new Set(values)].filter(Boolean);
       }
 
+      function escapeHTML(value) {
+        return (value || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+      }
+
       function populateSelect(selectEl, values) {
         values.forEach((value) => {
           const option = document.createElement("option");
@@ -152,16 +156,19 @@
       }
 
       function highlightSnippet(text, keywords, length = 160) {
-        if (!keywords.length) return text.slice(0, length);
+        if (!keywords.length) return escapeHTML(text.slice(0, length));
         const focus = keywords[0];
         const pattern = new RegExp(focus.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
         const match = pattern.exec(text);
-        if (!match) return text.slice(0, length);
+        if (!match) return escapeHTML(text.slice(0, length));
 
         const start = Math.max(match.index - 40, 0);
         const end = Math.min(match.index + focus.length + 80, text.length);
         const snippet = text.slice(start, end);
-        return snippet.replace(pattern, (m) => `<mark>${m}</mark>`);
+        const before = escapeHTML(snippet.slice(0, match.index - start));
+        const found = escapeHTML(snippet.slice(match.index - start, match.index - start + match[0].length));
+        const after = escapeHTML(snippet.slice(match.index - start + match[0].length));
+        return `${before}<mark>${found}</mark>${after}`;
       }
 
       function scoreRecord(record, keywords) {
@@ -191,10 +198,13 @@
 
           const header = document.createElement("div");
           header.className = "result-header";
-          header.innerHTML = `
-            <h3>${record.title}</h3>
-            <span class="badge">${record.category}</span>
-          `;
+          const titleEl = document.createElement("h3");
+          titleEl.textContent = record.title;
+          const badge = document.createElement("span");
+          badge.className = "badge";
+          badge.textContent = record.category;
+          header.appendChild(titleEl);
+          header.appendChild(badge);
 
           const meta = document.createElement("p");
           meta.className = "meta";
@@ -211,12 +221,26 @@
 
           const chips = document.createElement("div");
           chips.className = "actions";
-          const speakers = record.speakers.map((name) => `<span class="inline-badge">👤 ${name}</span>`).join(" ");
-          chips.innerHTML = `
-            <span class="inline-badge">🗓️ ${record.year}年度</span>
-            <span class="inline-badge">📍 ${record.location}</span>
-            ${speakers}
-          `;
+          const badges = [
+            `🗓️ ${record.year}年度`,
+            record.location ? `📍 ${record.location}` : null,
+          ]
+            .filter(Boolean)
+            .map((text) => {
+              const badgeEl = document.createElement("span");
+              badgeEl.className = "inline-badge";
+              badgeEl.textContent = text;
+              return badgeEl;
+            });
+
+          const speakerBadges = record.speakers.map((name) => {
+            const badgeEl = document.createElement("span");
+            badgeEl.className = "inline-badge";
+            badgeEl.textContent = `👤 ${name}`;
+            return badgeEl;
+          });
+
+          [...badges, ...speakerBadges].forEach((badgeEl) => chips.appendChild(badgeEl));
 
           li.appendChild(header);
           li.appendChild(meta);
